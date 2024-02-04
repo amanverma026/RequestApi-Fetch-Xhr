@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fetch API Example</title>
+</head>
+
+<body>
+
+  <div id="output-container">
+    <h2>API Request Results:</h2>
+    <ul id="output-list"></ul>
+  </div>
+
+  <button onclick="performGetRequest()">GET Request</button>
+  <button onclick="performPostRequest()">POST Request</button>
+  <button onclick="performPutRequest()">PUT Request</button>
+  <button onclick="performDeleteRequest()">DELETE Request</button>
+
+  <form id="postForm">
+    <label for="title">Title:</label>
+    <input type="text" id="title" name="title" required>
+
+    <label for="description">Description:</label>
+    <input type="text" id="description" name="description" required>
+
+    <label for="price">Price:</label>
+    <input type="number" id="price" name="price" required>
+
+    <label for="stock">Stock:</label>
+    <input type="number" id="stock" name="stock" required>
+
+    <button type="button" onclick="performPostRequest()">Submit POST Request</button>
+  </form>
+
+  <script>
+    const apiUrl = 'http://localhost:3000/dummy';
+    const outputList = document.getElementById('output-list');
+
+    function handleErrors(response) {
+      if (!response.ok) {
+        throw Error(response.statusText);
+      }
+      return response;
+    }
+
+    function displayResult(method, result) {
+      const listItem = document.createElement('li');
+      listItem.textContent = `${method} Request: ${JSON.stringify(result)}`;
+      outputList.appendChild(listItem);
+    }
+
+    function performGetRequest() {
+      fetch(apiUrl)
+        .then(handleErrors)
+        .then(response => response.json())
+        .then(data => {
+          displayResult('GET', data);
+        })
+        .catch(error => displayResult('GET Error', error));
+    }
+
+    function performPostRequest() {
+      const postData = {
+        title: document.getElementById('title').value,
+        description: document.getElementById('description').value,
+        price: parseFloat(document.getElementById('price').value),
+        stock: parseInt(document.getElementById('stock').value),
+      };
+
+      fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(postData),
+      })
+        .then(handleErrors)
+        .then(response => response.json())
+        .then(data => {
+          displayResult('POST', data);
+        })
+        .catch(error => displayResult('POST Error', error));
+    }
+
+    function performPutRequest() {
+      const productIdToUpdate = 1; // Update product with ID 1
+      const putData = {
+        title: 'Updated Product',
+        description: 'This product has been updated.',
+        price: 59.99,
+        stock: 20,
+      };
+
+      fetch(`${apiUrl}/products/${productIdToUpdate}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(putData),
+      })
+        .then(handleErrors)
+        .then(response => response.json())
+        .then(data => {
+          displayResult('PUT', data);
+        })
+        .catch(error => displayResult('PUT Error', error));
+    }
+
+    function performDeleteRequest() {
+      const productIdToDelete = 1;
+
+      fetch(`${apiUrl}/products/${productIdToDelete}`, {
+        method: 'DELETE',
+      })
+        .then(handleErrors)
+        .then(response => {
+          displayResult('DELETE', 'Product deleted successfully.');
+        })
+        .catch(error => displayResult('DELETE Error', error));
+    }
+  </script>
+
+</body>
+
+</html>
